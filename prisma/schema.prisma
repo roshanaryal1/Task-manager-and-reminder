@@ -1,0 +1,188 @@
+// Prisma schema for Task Manager & Reminder Application
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── User ─────────────────────────────────────────────────────────────────────
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  password      String
+  avatar        String?
+  timezone      String    @default("UTC")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  tasks         Task[]
+  reminders     Reminder[]
+  categories    Category[]
+  notifications Notification[]
+  settings      UserSettings?
+  pushSubs      PushSubscription[]
+
+  @@map("users")
+}
+
+// ─── UserSettings ─────────────────────────────────────────────────────────────
+model UserSettings {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  theme                 String   @default("light")
+  soundEnabled          Boolean  @default(true)
+  browserNotifications  Boolean  @default(true)
+  emailNotifications    Boolean  @default(false)
+  reminderLeadMinutes   Int      @default(5)
+  weekStartsOn          Int      @default(1) // 0=Sun, 1=Mon
+  defaultPriority       Priority @default(MEDIUM)
+  pomodoroWorkMinutes   Int      @default(25)
+  pomodoroBreakMinutes  Int      @default(5)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+// ─── Category ─────────────────────────────────────────────────────────────────
+model Category {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  color     String   @default("#6366f1")
+  icon      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@unique([userId, name])
+  @@map("categories")
+}
+
+// ─── Task ─────────────────────────────────────────────────────────────────────
+model Task {
+  id           String        @id @default(cuid())
+  userId       String
+  categoryId   String?
+  title        String
+  description  String?
+  priority     Priority      @default(MEDIUM)
+  status       TaskStatus    @default(PENDING)
+  dueDate      DateTime?
+  dueTime      String?       // "HH:MM" format
+  completedAt  DateTime?
+  position     Int           @default(0)
+  tags         String[]
+  recurring    RecurringType?
+  recurringEnd DateTime?
+  parentId     String?       // for recurring task instances
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category  Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  reminders Reminder[]
+  parent    Task?     @relation("RecurringInstances", fields: [parentId], references: [id])
+  children  Task[]    @relation("RecurringInstances")
+
+  @@index([userId, status])
+  @@index([userId, dueDate])
+  @@map("tasks")
+}
+
+// ─── Reminder ─────────────────────────────────────────────────────────────────
+model Reminder {
+  id          String         @id @default(cuid())
+  userId      String
+  taskId      String?
+  title       String
+  message     String?
+  remindAt    DateTime
+  snoozedTo   DateTime?
+  status      ReminderStatus @default(PENDING)
+  triggeredAt DateTime?
+  dismissedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, remindAt])
+  @@map("reminders")
+}
+
+// ─── Notification ─────────────────────────────────────────────────────────────
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean          @default(false)
+  data      Json?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+// ─── PushSubscription ─────────────────────────────────────────────────────────
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("push_subscriptions")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum RecurringType {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum ReminderStatus {
+  PENDING
+  TRIGGERED
+  SNOOZED
+  DISMISSED
+}
+
+enum NotificationType {
+  REMINDER
+  TASK_DUE
+  TASK_OVERDUE
+  SYSTEM
+}
