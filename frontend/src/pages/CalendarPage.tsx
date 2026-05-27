@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import {
   format, startOfMonth, endOfMonth, eachDayOfInterval,

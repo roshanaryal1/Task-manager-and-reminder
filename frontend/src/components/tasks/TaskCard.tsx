@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
-import { format, isAfter, isPast } from 'date-fns';
+import { format, isPast } from 'date-fns';
 import {
-  CheckCircle2, Circle, Clock, AlertCircle, Tag,
+  CheckCircle2, Circle, AlertCircle, Tag,
   Bell, MoreHorizontal, Edit2, Trash2, Calendar,
 } from 'lucide-react';
 import { useState } from 'react';

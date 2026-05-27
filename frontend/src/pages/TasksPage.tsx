@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Filter, LayoutList, Columns2, CheckSquare, Trash2, CheckCheck } from 'lucide-react';
+import { Plus, Filter, LayoutList, CheckSquare, Trash2, CheckCheck } from 'lucide-react';
 import { useTaskStore } from '../stores/taskStore';
 import { useUIStore } from '../stores/uiStore';
 import TaskCard from '../components/tasks/TaskCard';

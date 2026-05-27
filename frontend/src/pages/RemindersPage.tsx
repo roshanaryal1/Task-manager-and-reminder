@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Plus, Clock, Trash2, Moon, Check, X } from 'lucide-react';
+import { Bell, Plus, Clock, Trash2, Moon, Check } from 'lucide-react';
 import { useReminderStore } from '../stores/reminderStore';
 import { format, formatDistanceToNow, isPast } from 'date-fns';
 
@@ -20,7 +20,6 @@ export default function RemindersPage() {
   };
 
   const upcoming = reminders.filter(r => !isPast(new Date(r.remindAt)));
-  const past = reminders.filter(r => isPast(new Date(r.remindAt)));
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">

@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import { useTaskStore } from '../stores/taskStore';
 import { useUIStore } from '../stores/uiStore';

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
-import { Sun, Moon, Bell, Volume2, Shield, User, Palette, Loader2 } from 'lucide-react';
+import { Sun, Moon, Bell, Shield, User, Palette, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { authService } from '../services/authService';
 import { useUIStore } from '../stores/uiStore';

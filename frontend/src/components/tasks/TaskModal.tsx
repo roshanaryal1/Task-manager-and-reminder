@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Loader2, Bell, Plus, Trash2 } from 'lucide-react';
+import { X, Loader2, Bell } from 'lucide-react';
 import { useUIStore } from '../../stores/uiStore';
 import { useTaskStore } from '../../stores/taskStore';
 import { useReminderStore } from '../../stores/reminderStore';
@@ -37,7 +37,7 @@ export default function TaskModal() {
   const [saving, setSaving] = useState(false);
   const isEdit = !!taskModalId;
 
-  const { register, handleSubmit, control, reset, formState: { errors } } = useForm<FormData>({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { priority: 'MEDIUM', status: 'PENDING' },
   });
