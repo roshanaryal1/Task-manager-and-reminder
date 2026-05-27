@@ -1,0 +1,30 @@
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+# Install backend deps
+COPY backend/package*.json ./backend/
+RUN cd backend && npm ci
+
+# Copy prisma schema and generate client
+COPY prisma ./prisma
+RUN cd backend && npx prisma generate --schema ../prisma/schema.prisma
+
+# Build TypeScript
+COPY backend ./backend
+RUN cd backend && npm run build
+
+# ─── Production image ─────────────────────────────────────────────────────────
+FROM node:20-alpine
+WORKDIR /app
+
+COPY backend/package*.json ./backend/
+RUN cd backend && npm ci --omit=dev
+
+COPY --from=builder /app/backend/dist ./backend/dist
+COPY --from=builder /app/backend/node_modules/.prisma ./backend/node_modules/.prisma
+COPY --from=builder /app/backend/node_modules/@prisma ./backend/node_modules/@prisma
+COPY prisma ./prisma
+
+EXPOSE 8080
+
+CMD ["sh", "-c", "cd backend && node_modules/.bin/prisma migrate deploy --schema ../prisma/schema.prisma && node dist/server.js"]

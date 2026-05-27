@@ -19,7 +19,7 @@ import { startReminderScheduler } from './services/reminderScheduler';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
 // ─── Security & Middleware ────────────────────────────────────────────────────
 app.use(helmet({ crossOriginEmbedderPolicy: false }));
