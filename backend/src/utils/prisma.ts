@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
+
 // Singleton pattern — reuse connection in dev to avoid exhausting connections
 declare global {
   // eslint-disable-next-line no-var

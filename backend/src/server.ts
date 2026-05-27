@@ -56,10 +56,12 @@ app.get('/api/health', (_req, res) => {
 // ─── Error Handler ────────────────────────────────────────────────────────────
 app.use(errorHandler);
 
-// ─── Start ────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  startReminderScheduler();
-});
+// ─── Start (local only — Vercel handles listening in serverless mode) ─────────
+if (process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    startReminderScheduler();
+  });
+}
 
 export default app;
