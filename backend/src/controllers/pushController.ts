@@ -4,18 +4,31 @@ import webpush from 'web-push';
 import { prisma } from '../utils/prisma';
 import { AuthRequest } from '../middleware/auth';
 
-// Configure VAPID keys — generate with: npx web-push generate-vapid-keys
-webpush.setVapidDetails(
-  `mailto:${process.env.VAPID_EMAIL || 'admin@taskmanager.app'}`,
-  process.env.VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
+let vapidConfigured = false;
+
+function ensureVapidConfigured() {
+  if (vapidConfigured) return;
+  const publicKey = process.env.VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+  const email = process.env.VAPID_EMAIL || 'admin@taskmanager.app';
+  if (!publicKey || !privateKey) {
+    throw new Error('VAPID keys not configured');
+  }
+  webpush.setVapidDetails(`mailto:${email}`, publicKey, privateKey);
+  vapidConfigured = true;
+}
 
 export const getVapidKey = (_req: AuthRequest, res: Response) => {
+  try {
+    ensureVapidConfigured();
+  } catch (_) {
+    // Return key even if full config fails
+  }
   res.json({ publicKey: process.env.VAPID_PUBLIC_KEY });
 };
 
 export const subscribe = async (req: AuthRequest, res: Response) => {
+  ensureVapidConfigured();
   const schema = z.object({
     endpoint: z.string().url(),
     keys: z.object({
@@ -48,6 +61,7 @@ export const unsubscribe = async (req: AuthRequest, res: Response) => {
 };
 
 export const sendPushToUser = async (userId: string, payload: object) => {
+  ensureVapidConfigured();
   const subs = await prisma.pushSubscription.findMany({ where: { userId } });
 
   await Promise.allSettled(
